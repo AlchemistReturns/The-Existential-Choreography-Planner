@@ -1,33 +1,38 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useState, useEffect } from 'react'
+interface Choreography {
+  id: string;
+  title: string;
+  description: string;
+  duration: number;
+  dancers: number;
+}
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [tasks, setTasks] = useState<Choreography[]>([]);
+
+  useEffect(() => {
+    fetch('http://localhost:3000/api/tasks')
+      .then(res => res.json())
+      .then(data => setTasks(data))
+      .catch(err => console.error(err));
+  }, []);
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
       <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+        <h2>Tasks</h2>
+        {tasks.length === 0 ? (
+          <p>No tasks found</p>
+        ) : (
+          tasks.map((t) => (
+            <div key={t.id}>
+              <h3>{t.title}</h3>
+              <p>{t.description}</p>
+            </div>
+          ))
+        )}
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
   )
 }
