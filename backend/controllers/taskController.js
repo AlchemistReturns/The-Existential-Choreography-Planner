@@ -1,10 +1,9 @@
-import { Request, Response } from 'express';
-import { TaskService } from '../services/taskService';
+import { TaskService } from '../services/taskService.js';
 
 const taskService = new TaskService();
 
 export class TaskController {
-    getAll = async (req: Request, res: Response) => {
+    getAll = async (req, res) => {
         try {
             const tasks = await taskService.getAllTasks();
             res.json(tasks);
@@ -13,7 +12,7 @@ export class TaskController {
         }
     }
 
-    create = async (req: Request, res: Response) => {
+    create = async (req, res) => {
         try {
             const task = await taskService.addTask(req.body);
             res.status(201).json(task);
