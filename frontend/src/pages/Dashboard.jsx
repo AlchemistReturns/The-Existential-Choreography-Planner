@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../providers'
 import { useNavigate } from 'react-router-dom'
 import Sidebar from '../components/dashboard/Sidebar'
+import CreateFlowModal from '../components/dashboard/CreateFlowModal'
+import CreateTaskModal from '../components/dashboard/CreateTaskModal'
 import flowService from '../services/flow.service'
 import taskService from '../services/task.service'
 import '../styles/auth.css'
@@ -12,6 +14,10 @@ const Dashboard = () => {
     const [recentFlows, setRecentFlows] = useState([])
     const [recentTasks, setRecentTasks] = useState([])
     const [loading, setLoading] = useState(true)
+
+    // Modal States
+    const [showCreateFlow, setShowCreateFlow] = useState(false)
+    const [showCreateTask, setShowCreateTask] = useState(false)
 
     useEffect(() => {
         const fetchData = async () => {
@@ -39,6 +45,21 @@ const Dashboard = () => {
         fetchData()
     }, [])
 
+    const refreshData = async () => {
+        try {
+            const [flowsData, tasksData] = await Promise.all([
+                flowService.getAll(),
+                taskService.getAll()
+            ])
+            const flows = Array.isArray(flowsData) ? flowsData : (flowsData.data || [])
+            const tasks = Array.isArray(tasksData) ? tasksData : (tasksData.data || [])
+            setRecentFlows(flows.slice(0, 5))
+            setRecentTasks(tasks.slice(0, 5))
+        } catch (error) {
+            console.error("Error refreshing data:", error)
+        }
+    }
+
     return (
         <div className="dashboard-layout">
             <Sidebar />
@@ -53,9 +74,8 @@ const Dashboard = () => {
 
                 <div className="content-body">
                     <div className="dashboard-actions">
-                        {/* Placeholder actions - ideally these would open modals or navigate to create pages */}
-                        <button className="btn-primary" onClick={() => console.log('Create Flow')}>+ Create Flow</button>
-                        <button className="btn-card" onClick={() => console.log('Create Task')}>+ Create Task</button>
+                        <button className="btn-primary" onClick={() => setShowCreateFlow(true)}>+ Create Flow</button>
+                        <button className="btn-card" onClick={() => setShowCreateTask(true)}>+ Create Task</button>
                     </div>
 
                     <div className="dashboard-grid-2">
@@ -93,6 +113,21 @@ const Dashboard = () => {
                     </div>
                 </div>
             </main>
+
+            {/* Modals */}
+            {showCreateFlow && (
+                <CreateFlowModal
+                    onClose={() => setShowCreateFlow(false)}
+                    onSuccess={refreshData}
+                />
+            )}
+
+            {showCreateTask && (
+                <CreateTaskModal
+                    onClose={() => setShowCreateTask(false)}
+                    onSuccess={refreshData}
+                />
+            )}
         </div>
     )
 }
