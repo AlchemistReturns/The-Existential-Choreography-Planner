@@ -200,12 +200,42 @@ To support the features above, the database models must include:
 - `description`: String
 - `nodeId`: String (Links backend task to frontend visual node)
 
-### 3. API Endpoints (Core)
-- `POST /api/auth/register`
-- `POST /api/auth/login`
-- `GET /api/users/me` (Profile + Stats)
-- `GET /api/flows` (List user flows)
-- `POST /api/flows` (Create flow)
-- `GET /api/flows/:id` (Get flow details + tasks)
-- `PUT /api/flows/:id` (Update flow layout/data)
+### 3. API Endpoints Reference
+
+#### 3.1 Authentication & User (`/api/auth`)
+
+| Method | Endpoint | Description | Request Body | Response |
+| :--- | :--- | :--- | :--- | :--- |
+| `POST` | `/register` | Register new user | `{ fullName, username, email, password }` | `{ message, user }` + Cookies |
+| `POST` | `/login` | Login user | `{ email, password }` | `{ message, user }` + Cookies |
+| `POST` | `/refresh` | Refresh access token | (Cookie: `refreshToken`) | `{ message }` + Cookies |
+| `POST` | `/logout` | Logout user | - | `{ message }` (Cookies cleared) |
+| `POST` | `/forgot-password` | Request reset email | `{ email }` | `{ message }` |
+| `POST` | `/reset-password/:token` | Reset password | `{ password }` | `{ message, user }` + Cookies |
+| `GET` | `/check-username/:username` | Check availability | - | `{ available: boolean, message }` |
+| `GET` | `/profile` | Get current user | (Cookie: `accessToken`) | `{ user }` (includes `badges`) |
+| `PUT` | `/profile` | Update profile | `{ fullName, username, bio, avatar }` | `{ message, user }` |
+| `GET` | `/users` | **[Admin]** List users | - | `{ users: [...] }` |
+| `PUT` | `/users/:id/role` | **[Admin]** Update role | `{ role: 'user'\|'admin' }` | `{ message, user }` |
+| `PUT` | `/users/:id/status` | **[Admin]** Update status | `{ isActive: boolean }` | `{ message, user }` |
+
+#### 3.2 Tasks (`/api/tasks`)
+
+| Method | Endpoint | Description | Request Body | Response |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/` | Get all tasks | - | `[ { _id, title, ... }, ... ]` |
+| `POST` | `/` | Create task | `{ title, description }` | `{ _id, title, ... }` |
+| `GET` | `/:id` | Get single task | - | `{ _id, title, ... }` |
+| `PUT` | `/:id` | Update task | `{ title, description, status }` | `{ _id, title, ... }` |
+| `DELETE` | `/:id` | Delete task | - | `{ message }` |
+
+#### 3.3 Choreography Flows (`/api/flows`)
+
+| Method | Endpoint | Description | Request Body | Response |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/` | Get user's flows | - | `[ { _id, title, thumbnail, ... } ]` |
+| `POST` | `/` | Create flow | `{ title, flowData }` | `{ _id, title, flowData, ... }` |
+| `GET` | `/:id` | Get flow details | - | `{ _id, title, flowData: { nodes, edges } }` |
+| `PUT` | `/:id` | Update flow | `{ title, flowData, thumbnail, isPublic }` | `{ _id, title, ... }` |
+| `DELETE` | `/:id` | Delete flow | - | `{ message }` |
 
